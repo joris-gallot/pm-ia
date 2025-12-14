@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+
+env:
+  NODE_ENV: production
+  VITE_BACKEND_URL: whatever
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Lint
+        run: pnpm lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+  backend_checks:
+    name: Backend - All checks
+    needs: [changes, typecheck, lint, build]
+    runs-on: ubuntu-latest
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    steps:
+      - run: echo "All backend checks passed"
+
+  backend_deploy:
+    name: Backend - Deploy
+    needs: backend_checks
+    if: false
+    # if: ${{ needs.changes.outputs.backend == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Run migrations
+        env:
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_PORT: ${{ secrets.PG_PORT }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+          PG_DATABASE: ${{ secrets.PG_DATABASE }}
+          AUTH_SECRET: whatever
+          GOOGLE_CLIENT_SECRET: whatever
+          GOOGLE_CLIENT_ID: whatever
+          STRIPE_SECRET_KEY: whatever
+          STRIPE_WEBHOOK_SECRET: whatever
+          STRIPE_PRO_PLAN_PRICE_ID: whatever
+        run: pnpm migrate latest
+
+      - name: Build and Upload Sentry Sourcemaps
+        run: pnpm build && pnpm sentry:sourcemaps
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Trigger Dokploy Deployment
+        env:
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_BACKEND_APP_ID: ${{ secrets.DOKPLOY_BACKEND_APP_ID }}
+        run: |
+          curl -X 'POST' \
+          'https://dokploy.jorisgallot.dev/api/trpc/application.deploy' \
+          -H 'accept: application/json' \
+          -H "x-api-key: $DOKPLOY_API_KEY" \
+          -H 'Content-Type: application/json' \
+          -d "{
+              \"json\":{
+                  \"applicationId\": \"$DOKPLOY_BACKEND_APP_ID\"
+              }
+          }"

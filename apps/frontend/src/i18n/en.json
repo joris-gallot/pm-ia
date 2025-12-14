@@ -1,0 +1,119 @@
+{
+  "common": {
+    "github": "GitHub",
+    "google": "Google"
+  },
+  "sidebar": {
+    "home": "Home",
+    "upgrade_pro": "Upgrade to Pro",
+    "user": {
+      "account": "Account",
+      "billing": "Billing",
+      "signout": "Log out"
+    }
+  },
+  "signin": {
+    "title": "Sign in to your account",
+    "description": "Enter your email and password to sign in",
+    "or_continue_with": "or continue with",
+    "form": {
+      "email": {
+        "label": "Email"
+      },
+      "password": {
+        "label": "Password"
+      },
+      "submit": "Sign in"
+    },
+    "have_account": "Don't have an account?",
+    "signup": "Sign up"
+  },
+  "signup": {
+    "title": "Create an account",
+    "description": "Enter your email below to create your account",
+    "or_continue_with": "Or continue with",
+    "form": {
+      "email": {
+        "label": "Email"
+      },
+      "password": {
+        "label": "Password"
+      },
+      "confirm_password": {
+        "label": "Confirm Password"
+      },
+      "submit": "Create account"
+    },
+    "already_have_account": "Already have an account?",
+    "signin": "Sign in"
+  },
+  "home": {
+    "title": "Home"
+  },
+  "account": {
+    "title": "Account",
+    "description": "Manage your account settings.",
+    "profile": {
+      "form": {
+        "username": {
+          "label": "Username",
+          "description": "This is your public display name. It can be your real name or a pseudonym."
+        },
+        "email": {
+          "label": "Email",
+          "verified": "Verified email",
+          "not_verified": "Not verified email. Check your inbox for a verification email."
+        },
+        "submit": "Save",
+        "reset": "Reset changes"
+      },
+      "toast": {
+        "success": "Updated!",
+        "success_description": "Your profile has been updated successfully."
+      }
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "description": "Manage your subscription and billing information.",
+    "current_plan": {
+      "title": "Current Plan",
+      "active": "Active",
+      "description": "Your current subscription details",
+      "plan": "Plan",
+      "price": "Price",
+      "next_billing": "Next billing date",
+      "status": "Status",
+      "canceling": "Canceling at period end",
+      "manage": "Manage Billing"
+    },
+    "free_plan": {
+      "title": "Free Plan",
+      "current": "Current Plan",
+      "description": "You are currently on the free plan",
+      "features": {
+        "basic": "Basic features included",
+        "limited": "Limited usage"
+      }
+    },
+    "pro_plan": {
+      "title": "Pro Plan",
+      "popular": "Popular",
+      "description": "Unlock all features with Pro",
+      "per_month": "month",
+      "subscribe": "Subscribe to Pro",
+      "current_plan": "You are subscribed to this plan",
+      "features": {
+        "unlimited": "Unlimited usage",
+        "priority": "Priority support",
+        "advanced": "Advanced features",
+        "support": "24/7 customer support"
+      }
+    }
+  },
+  "error404": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist.",
+    "go_home": "Go Home"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "frontend",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@better-auth/stripe": "catalog:stripe",
+    "@sentry/vite-plugin": "catalog:sentry",
+    "@sentry/vue": "catalog:sentry",
+    "@tanstack/vue-table": "catalog:vue",
+    "@trpc/client": "catalog:trpc",
+    "@vueuse/core": "catalog:vue",
+    "better-auth": "catalog:auth",
+    "class-variance-authority": "catalog:css",
+    "clsx": "catalog:css",
+    "lucide-vue-next": "catalog:vue",
+    "reka-ui": "catalog:vue",
+    "tailwind-merge": "catalog:tailwind",
+    "tw-animate-css": "catalog:tailwind",
+    "type-fest": "catalog:utils",
+    "vee-validate": "catalog:vue",
+    "vue": "catalog:vue",
+    "vue-i18n": "catalog:vue",
+    "vue-router": "catalog:vue",
+    "vue-sonner": "catalog:vue",
+    "zod": "catalog:zod"
+  },
+  "devDependencies": {
+    "@julr/vite-plugin-validate-env": "catalog:vite",
+    "@playwright/test": "catalog:test",
+    "@tailwindcss/vite": "catalog:tailwind",
+    "@types/node": "catalog:dev",
+    "@vitejs/plugin-vue": "catalog:vue",
+    "tailwindcss": "catalog:tailwind",
+    "typescript": "catalog:dev",
+    "vite": "catalog:vite",
+    "vue-tsc": "catalog:vue"
+  }
+}

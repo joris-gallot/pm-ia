@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./shadcn-theme.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@utilities {
+  --container-3xl: 24rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "common",
+  "type": "module",
+  "dependencies": {
+    "zod": "catalog:zod"
+  }
+}
