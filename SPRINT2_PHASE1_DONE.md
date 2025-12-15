@@ -1,12 +1,14 @@
-# Sprint 2 - Phase 1 Complete ✅
+# Sprint 2 - Phases 1 & 2 Complete ✅
 
 ## 🎯 Objective
 
 Set up AI infrastructure with Ollama for local development while maintaining architecture for future multi-provider support (OpenAI, Anthropic, BYO tokens, multi-models).
 
+Build complete RAG system and AI assistant services.
+
 ---
 
-## ✅ Completed
+## ✅ Phase 1 - Infrastructure (Complete)
 
 ### 1. Environment Configuration
 
@@ -146,6 +148,112 @@ AI_ANTHROPIC_CHAT_MODEL=claude-3-5-sonnet-20241022
 
 ---
 
+## ✅ Phase 2 - Services (Complete)
+
+### 1. Database Schema - AI Tables
+
+**File Modified**: `apps/backend/src/db/schema.ts`
+
+**7 New Tables Added**:
+1. **`aiProviderConfig`** - System/org AI provider configurations
+   - organizationId (nullable for system defaults)
+   - provider, apiKey, apiUrl
+   - isEnabled flag
+   
+2. **`aiUserCredential`** - User BYO tokens (foundation for Sprint 3+)
+   - userId, provider, apiKey (encrypted)
+   - isEnabled flag
+   
+3. **`aiModelConfig`** - Available models and pricing
+   - provider, modelId, displayName
+   - capabilities array, contextWindow
+   - costPer1kTokensInput/Output
+   - isDefault flag
+   
+4. **`aiConversation`** - Chat conversations
+   - contextSpaceId (nullable for global)
+   - userId, organizationId
+   - type (context_space | global)
+   
+5. **`aiMessage`** - Chat messages
+   - conversationId, role, content
+   - Full conversation history
+   
+6. **`embedding`** - Vector embeddings (pgvector)
+   - contextSpaceId, sourceType, sourceId
+   - content, embedding (vector 1536 dimensions)
+   - For RAG similarity search
+   
+7. **`aiUsageLog`** - Usage tracking and costs
+   - userId, organizationId, provider, modelId
+   - tokensInput/Output, cost
+   - credentialSource, conversationId
+
+**Relations Added**: All tables properly linked with foreign keys and Drizzle relations
+
+### 2. RAG Service
+
+**File Created**: `apps/backend/src/services/ai/rag.ts`
+
+**Functions Implemented**:
+- ✅ `generateEmbedding(userId, orgId, text)` - Generate embeddings via provider factory
+- ✅ `storeEmbedding(params)` - Store embedding in database
+- ✅ `searchSimilar(queryEmbedding, contextSpaceId?, limit)` - pgvector cosine similarity search
+- ✅ `getContextForSpace(contextSpaceId, userId, orgId)` - Build full context for AI
+  - Space description, parent chain, children
+  - Feature requests
+  - Similar contexts via embeddings
+- ✅ `embedContextSpace(contextSpaceId, userId, orgId)` - Embed space description
+- ✅ `embedFeatureRequest(featureRequestId, userId, orgId)` - Embed feature request
+- ✅ `reembedAll(organizationId, userId)` - Batch re-embed all data
+
+**Features**:
+- Uses provider factory for embedding generation
+- Logs usage via AIUsageService
+- Automatic embedding on create/update
+- Vector similarity search with pgvector
+- Comprehensive context building
+
+### 3. Context Space Assistant Service
+
+**File Created**: `apps/backend/src/services/ai/context-assistant.ts`
+
+**Functions Implemented**:
+- ✅ `generateSummary(contextSpaceId, userId, orgId)` - AI-generated space summary
+- ✅ `detectDuplicates(contextSpaceId, userId, orgId)` - Find duplicate features with similarity scores
+- ✅ `groupByTheme(contextSpaceId, userId, orgId)` - Group features by theme/problem
+- ✅ `identifyQuickWins(contextSpaceId, userId, orgId)` - Find low-effort, high-impact features
+- ✅ `suggestFeatures(contextSpaceId, userId, orgId)` - AI suggests new features
+- ✅ `startConversation(contextSpaceId, userId, orgId)` - Create conversation
+- ✅ `sendMessage(conversationId, userId, orgId, message)` - Contextual chat with full space context
+- ✅ `getConversation(conversationId)` - Get conversation history
+
+**Features**:
+- JSON-structured responses for duplicates, themes, quick wins
+- Full context included in every chat message
+- Usage tracking for all AI calls
+- System prompts optimized for each function
+
+### 4. Global Assistant Service
+
+**File Created**: `apps/backend/src/services/ai/global-assistant.ts`
+
+**Functions Implemented**:
+- ✅ `recommendSpaces(query, userId, orgId, limit)` - AI recommends relevant spaces via embeddings
+- ✅ `analyzeAcrossSpaces(spaceIds, userId, orgId)` - Cross-space strategic analysis
+- ✅ `startConversation(userId, orgId)` - Create global conversation
+- ✅ `sendMessage(conversationId, userId, orgId, message, selectedSpaceIds?)` - Chat with auto/manual space selection
+- ✅ `getConversation(conversationId)` - Get conversation history
+
+**Features**:
+- **Auto mode**: AI selects relevant spaces based on query
+- **Manual mode**: User selects specific spaces
+- Vector similarity for space recommendations
+- Cross-cutting analysis and insights
+- Full conversation history
+
+---
+
 ## 🧪 Testing
 
 ### Manual Test
@@ -168,7 +276,7 @@ pnpm --filter backend exec tsx src/services/ai/test-ollama.ts
 
 ---
 
-## 🎯 What's Working Now
+## 🎯 What's Working Now (Phases 1 & 2)
 
 ### Developer Experience
 1. Install Ollama → Pull models → Start coding
@@ -196,36 +304,33 @@ const embedding = await provider.embed('Feature description text')
 
 ---
 
-## 🚧 Next Steps (Phase 2)
+## 🚧 Next Steps (Phase 3)
 
 ### Immediate
-1. **Install pgvector** - PostgreSQL extension for vector similarity
-2. **Database Schema** - Create all 7 AI tables:
-   - `ai_provider_config` - System/org provider configurations
-   - `ai_user_credential` - User BYO tokens (foundation)
-   - `ai_model_config` - Available models and pricing
-   - `ai_usage_log` - Usage tracking and costs
-   - `ai_conversation` - Chat conversations
-   - `ai_message` - Chat messages
-   - `embedding` - Vector embeddings with pgvector
-
-3. **RAG Service** - Vector similarity search
-   - `generateEmbedding()` - Use factory to get embedding provider
-   - `storeEmbedding()` - Save to database
-   - `searchSimilar()` - pgvector cosine similarity
-   - `getContextForSpace()` - Build context for AI
-
-4. **Context Assistant Service** - Space-specific assistant
-   - Summary generation
-   - Duplicate detection
-   - Theme grouping
-   - Quick wins identification
-   - Feature suggestions
-   - Contextual chat
-
-5. **tRPC Routers** - API endpoints
-   - `context-assistant` router
-   - `global-assistant` router
+1. **tRPC Routers** - API endpoints
+   - `context-assistant` router with all procedures
+   - `global-assistant` router with all procedures
+   
+2. **Zod Schemas** - Input validation
+   - `apps/common/src/schemas/ai.ts`
+   - Schemas for all assistant functions
+   
+3. **Auto-embedding Hooks** - Automatic embedding generation
+   - Hook on context space create/update
+   - Hook on feature request create/update
+   - Trigger RAG embedding automatically
+   
+4. **Frontend Components** - AI UI components
+   - `AssistantChat.vue`
+   - `AssistantSummary.vue`
+   - `DuplicateDetection.vue`
+   - `ThemeGrouping.vue`
+   - `QuickWins.vue`
+   - `FeatureSuggestions.vue`
+   
+5. **Frontend Pages** - AI pages
+   - `ContextSpaceAssistant.vue` - `/spaces/:id/assistant`
+   - `GlobalAssistant.vue` - `/assistant`
 
 ---
 
@@ -252,14 +357,20 @@ const embedding = await provider.embed('Feature description text')
 
 | File | Purpose | Status |
 |------|---------|--------|
+| **Infrastructure** | | |
 | `services/ai/types.ts` | Common interfaces | ✅ Complete |
 | `services/ai/factory.ts` | Provider selection | ✅ Complete (system only) |
-| `services/ai/usage.ts` | Usage tracking | 🚧 Stub |
+| `services/ai/usage.ts` | Usage tracking | 🚧 Stub (console logging) |
 | `services/ai/providers/ollama.ts` | Ollama implementation | ✅ Complete |
 | `services/ai/providers/openai.ts` | OpenAI stub | 🚧 TODO |
 | `services/ai/providers/anthropic.ts` | Anthropic stub | 🚧 TODO |
 | `services/ai/README.md` | Implementation guide | ✅ Complete |
-| `services/ai/test-ollama.ts` | Test suite | ✅ Complete |
+| **Services** | | |
+| `services/ai/rag.ts` | RAG service | ✅ Complete |
+| `services/ai/context-assistant.ts` | Context assistant | ✅ Complete |
+| `services/ai/global-assistant.ts` | Global assistant | ✅ Complete |
+| **Database** | | |
+| `db/schema.ts` | AI tables (7 tables) | ✅ Complete |
 
 ---
 
@@ -293,7 +404,7 @@ const embedding = await provider.embed('Feature description text')
 
 ---
 
-**Phase 1 Status**: ✅ Complete  
-**Ready for**: Phase 2 (Database Schema + RAG)  
-**Blocked by**: Nothing - ready to proceed  
-**Estimated Phase 2 Time**: 4-6 hours
+**Phases 1 & 2 Status**: ✅ Complete  
+**Ready for**: Phase 3 (tRPC Routers + Frontend)  
+**Blocked by**: Database migration (user will apply)  
+**Estimated Phase 3 Time**: 6-8 hours

@@ -54,7 +54,7 @@ export class AIUsageService {
     //   createdAt: new Date(),
     // })
 
-    // For now: just log to console in development
+    // For now: just log in development
     if (isDev) {
       logger.info({
         provider: _params.provider,

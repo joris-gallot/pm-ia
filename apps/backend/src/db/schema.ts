@@ -1,12 +1,31 @@
-import type { FEATURE_REQUEST_SOURCES, FeatureRequestSource, ORGANIZATION_ROLES, OrganizationRole } from '@common/constants'
+import type {
+  AI_CAPABILITIES,
+  AI_PROVIDERS,
+  AICapability,
+  AIProvider,
+  CONVERSATION_TYPES,
+  ConversationType,
+  CREDENTIAL_SOURCES,
+  CredentialSource,
+  EMBEDDING_SOURCE_TYPES,
+  EmbeddingSourceType,
+  FEATURE_REQUEST_SOURCES,
+  FeatureRequestSource,
+  MESSAGE_ROLES,
+  MessageRole,
+  ORGANIZATION_ROLES,
+  OrganizationRole,
+} from '@common/constants'
 import { relations } from 'drizzle-orm'
 import {
   boolean,
+  decimal,
   index,
   integer,
   pgTable,
   text,
   timestamp,
+  vector,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -256,5 +275,225 @@ export const featureRequestRelations = relations(featureRequest, ({ one }) => ({
   creator: one(user, {
     fields: [featureRequest.createdBy],
     references: [user.id],
+  }),
+}))
+
+// AI Tables
+
+// AI Provider Configuration (system/org level)
+export const aiProviderConfig = pgTable(
+  'ai_provider_config',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id').references(() => organization.id, { onDelete: 'cascade' }), // null = system default
+    provider: text<'provider', AIProvider, typeof AI_PROVIDERS>('provider').notNull(),
+    apiKey: text('api_key'), // encrypted, nullable for Ollama
+    apiUrl: text('api_url'), // for custom Ollama endpoint
+    isEnabled: boolean('is_enabled').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  table => [
+    index('ai_provider_config_organizationId_idx').on(table.organizationId),
+    index('ai_provider_config_provider_idx').on(table.provider),
+  ],
+)
+
+// User BYO Tokens (Bring Your Own API Keys)
+export const aiUserCredential = pgTable(
+  'ai_user_credential',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    provider: text<'provider', AIProvider, typeof AI_PROVIDERS>('provider').notNull(),
+    apiKey: text('api_key').notNull(), // encrypted
+    isEnabled: boolean('is_enabled').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  table => [
+    index('ai_user_credential_userId_idx').on(table.userId),
+    index('ai_user_credential_provider_idx').on(table.provider),
+  ],
+)
+
+// AI Model Configuration (available models and pricing)
+export const aiModelConfig = pgTable(
+  'ai_model_config',
+  {
+    id: text('id').primaryKey(),
+    provider: text<'provider', AIProvider, typeof AI_PROVIDERS>('provider').notNull(),
+    modelId: text('model_id').notNull(), // e.g., 'gpt-4', 'llama3'
+    displayName: text('display_name').notNull(),
+    capabilities: text<'capabilities', AICapability, typeof AI_CAPABILITIES>('capabilities').array().notNull(),
+    contextWindow: integer('context_window').notNull(),
+    costPer1kTokensInput: decimal('cost_per_1k_tokens_input'), // null for Ollama
+    costPer1kTokensOutput: decimal('cost_per_1k_tokens_output'),
+    isEnabled: boolean('is_enabled').notNull().default(true),
+    isDefault: boolean('is_default').notNull().default(false),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  table => [
+    index('ai_model_config_provider_idx').on(table.provider),
+    index('ai_model_config_modelId_idx').on(table.modelId),
+  ],
+)
+
+// AI Conversations
+export const aiConversation = pgTable(
+  'ai_conversation',
+  {
+    id: text('id').primaryKey(),
+    contextSpaceId: text('context_space_id').references(() => contextSpace.id, { onDelete: 'cascade' }), // nullable for global
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    type: text<'type', ConversationType, typeof CONVERSATION_TYPES>('type').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  table => [
+    index('ai_conversation_contextSpaceId_idx').on(table.contextSpaceId),
+    index('ai_conversation_userId_idx').on(table.userId),
+    index('ai_conversation_organizationId_idx').on(table.organizationId),
+  ],
+)
+
+// AI Messages
+export const aiMessage = pgTable(
+  'ai_message',
+  {
+    id: text('id').primaryKey(),
+    conversationId: text('conversation_id')
+      .notNull()
+      .references(() => aiConversation.id, { onDelete: 'cascade' }),
+    role: text<'role', MessageRole, typeof MESSAGE_ROLES>('role').notNull(),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  table => [
+    index('ai_message_conversationId_idx').on(table.conversationId),
+  ],
+)
+
+// Embeddings (with pgvector)
+export const embedding = pgTable(
+  'embedding',
+  {
+    id: text('id').primaryKey(),
+    contextSpaceId: text('context_space_id')
+      .notNull()
+      .references(() => contextSpace.id, { onDelete: 'cascade' }),
+    sourceType: text<'source_type', EmbeddingSourceType, typeof EMBEDDING_SOURCE_TYPES>('source_type').notNull(),
+    sourceId: text('source_id').notNull(),
+    content: text('content').notNull(),
+    embedding: vector('embedding', { dimensions: 1536 }), // OpenAI text-embedding-3-small dimensions
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  table => [
+    index('embedding_contextSpaceId_idx').on(table.contextSpaceId),
+    index('embedding_sourceType_idx').on(table.sourceType),
+    index('embedding_sourceId_idx').on(table.sourceId),
+  ],
+)
+
+// AI Usage Log (tracking and costs)
+export const aiUsageLog = pgTable(
+  'ai_usage_log',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    provider: text<'provider', AIProvider, typeof AI_PROVIDERS>('provider').notNull(),
+    modelId: text('model_id').notNull(),
+    capability: text<'capability', AICapability, typeof AI_CAPABILITIES>('capability').notNull(),
+    tokensInput: integer('tokens_input').notNull(),
+    tokensOutput: integer('tokens_output').notNull(),
+    cost: decimal('cost').notNull(),
+    credentialSource: text<'credential_source', CredentialSource, typeof CREDENTIAL_SOURCES>('credential_source').notNull(),
+    conversationId: text('conversation_id').references(() => aiConversation.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  table => [
+    index('ai_usage_log_userId_idx').on(table.userId),
+    index('ai_usage_log_organizationId_idx').on(table.organizationId),
+    index('ai_usage_log_provider_idx').on(table.provider),
+    index('ai_usage_log_conversationId_idx').on(table.conversationId),
+    index('ai_usage_log_createdAt_idx').on(table.createdAt),
+  ],
+)
+
+// AI Relations
+export const aiProviderConfigRelations = relations(aiProviderConfig, ({ one }) => ({
+  organization: one(organization, {
+    fields: [aiProviderConfig.organizationId],
+    references: [organization.id],
+  }),
+}))
+
+export const aiUserCredentialRelations = relations(aiUserCredential, ({ one }) => ({
+  user: one(user, {
+    fields: [aiUserCredential.userId],
+    references: [user.id],
+  }),
+}))
+
+export const aiConversationRelations = relations(aiConversation, ({ one, many }) => ({
+  contextSpace: one(contextSpace, {
+    fields: [aiConversation.contextSpaceId],
+    references: [contextSpace.id],
+  }),
+  user: one(user, {
+    fields: [aiConversation.userId],
+    references: [user.id],
+  }),
+  organization: one(organization, {
+    fields: [aiConversation.organizationId],
+    references: [organization.id],
+  }),
+  messages: many(aiMessage),
+  usageLogs: many(aiUsageLog),
+}))
+
+export const aiMessageRelations = relations(aiMessage, ({ one }) => ({
+  conversation: one(aiConversation, {
+    fields: [aiMessage.conversationId],
+    references: [aiConversation.id],
+  }),
+}))
+
+export const embeddingRelations = relations(embedding, ({ one }) => ({
+  contextSpace: one(contextSpace, {
+    fields: [embedding.contextSpaceId],
+    references: [contextSpace.id],
+  }),
+}))
+
+export const aiUsageLogRelations = relations(aiUsageLog, ({ one }) => ({
+  user: one(user, {
+    fields: [aiUsageLog.userId],
+    references: [user.id],
+  }),
+  organization: one(organization, {
+    fields: [aiUsageLog.organizationId],
+    references: [organization.id],
+  }),
+  conversation: one(aiConversation, {
+    fields: [aiUsageLog.conversationId],
+    references: [aiConversation.id],
   }),
 }))
