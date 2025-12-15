@@ -30,6 +30,24 @@ pnpm db:push
 pnpm dev
 ```
 
+### AI Setup (Ollama for Development)
+```bash
+# Install Ollama
+brew install ollama
+
+# Pull required models
+ollama pull llama3            # For chat
+ollama pull nomic-embed-text  # For embeddings
+
+# Start Ollama server
+ollama serve  # Runs on http://localhost:11434
+
+# Test the AI integration
+pnpm --filter backend exec tsx scripts/test-ollama.ts
+```
+
+**Note**: Ollama is used for local development (free). Production will use OpenAI/Anthropic.
+
 ### Frontend
 ```
 cd apps/frontend
@@ -37,9 +55,7 @@ cp .env.example .env
 pnpm dev
 ```
 
-```
-open http://localhost:3001
-```
+Open http://localhost:3001
 
 ## Secrets for Github actions
 - SENTRY_AUTH_TOKEN: Sentry auth token for sourcemaps uploading
