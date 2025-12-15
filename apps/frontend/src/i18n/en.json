@@ -4,11 +4,11 @@
     "google": "Google"
   },
   "sidebar": {
-    "home": "Home",
     "upgrade_pro": "Upgrade to Pro",
     "user": {
       "account": "Account",
       "billing": "Billing",
+      "organization": "Organization",
       "signout": "Log out"
     }
   },
@@ -115,5 +115,148 @@
     "title": "Page Not Found",
     "description": "The page you are looking for does not exist.",
     "go_home": "Go Home"
+  },
+  "context_space": {
+    "title": "Context Spaces",
+    "create": "Create Space",
+    "edit": "Edit Space",
+    "delete": "Delete Space",
+    "delete_confirm": "Are you sure you want to delete this space?",
+    "delete_warning": "This action cannot be undone.",
+    "empty_state": {
+      "title": "No context spaces yet",
+      "description": "Create your first context space to get started",
+      "action": "Create Context Space"
+    },
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "e.g., Mobile App, Backend API"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe what this space is about..."
+      },
+      "type": {
+        "label": "Type",
+        "placeholder": "e.g., product, app, project, feature"
+      },
+      "parent": {
+        "label": "Parent Space",
+        "placeholder": "Select parent space (optional)"
+      },
+      "submit": "Create Space",
+      "update": "Update Space",
+      "cancel": "Cancel"
+    },
+    "detail": {
+      "created_by": "Created by",
+      "created_at": "Created",
+      "parent": "Parent",
+      "children": "Child Spaces",
+      "feature_requests": "Feature Requests",
+      "no_children": "No child spaces yet",
+      "assistant": "AI Assistant"
+    },
+    "toast": {
+      "created": "Context space created",
+      "updated": "Context space updated",
+      "deleted": "Context space deleted"
+    }
+  },
+  "feature_request": {
+    "title": "Feature Requests",
+    "create": "New Request",
+    "edit": "Edit Request",
+    "delete": "Delete Request",
+    "delete_confirm": "Are you sure you want to delete this feature request?",
+    "empty_state": {
+      "title": "No feature requests yet",
+      "description": "Add your first feature request to this space",
+      "action": "Create Feature Request"
+    },
+    "form": {
+      "title": {
+        "label": "Title",
+        "placeholder": "Brief description of the feature"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Detailed description..."
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add tags..."
+      },
+      "submit": "Create Request",
+      "update": "Update Request",
+      "cancel": "Cancel"
+    },
+    "detail": {
+      "created_by": "Created by",
+      "created_at": "Created",
+      "source": "Source",
+      "tags": "Tags",
+      "no_tags": "No tags"
+    },
+    "source": {
+      "manual": "Manual",
+      "imported": "Imported"
+    },
+    "toast": {
+      "created": "Feature request created",
+      "updated": "Feature request updated",
+      "deleted": "Feature request deleted"
+    }
+  },
+  "organization": {
+    "title": "Organization",
+    "settings": "Organization Settings",
+    "members": "Members",
+    "form": {
+      "name": {
+        "label": "Organization Name",
+        "placeholder": "Enter organization name"
+      },
+      "submit": "Save",
+      "cancel": "Cancel"
+    },
+    "members_list": {
+      "title": "Organization Members",
+      "description": "Manage who has access to your organization",
+      "invite": "Invite Member",
+      "remove": "Remove",
+      "change_role": "Change Role",
+      "you": "You",
+      "role": {
+        "admin": "Admin",
+        "manager": "Manager",
+        "member": "Member"
+      }
+    },
+    "invite_form": {
+      "title": "Invite Member",
+      "email": {
+        "label": "Email",
+        "placeholder": "email@example.com"
+      },
+      "role": {
+        "label": "Role"
+      },
+      "submit": "Send Invitation",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "updated": "Organization updated",
+      "member_added": "Member added",
+      "member_removed": "Member removed",
+      "role_updated": "Role updated"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "organization": "Organization",
+    "members": "Members",
+    "integrations": "Integrations"
   }
 }

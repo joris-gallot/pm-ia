@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import {
-  BadgeCheck,
+  Building2,
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  User,
 } from 'lucide-vue-next'
 
 import {
@@ -72,7 +73,7 @@ const { isMobile } = useSidebar()
           <DropdownMenuGroup>
             <RouterLink :to="{ name: 'Account' }">
               <DropdownMenuItem>
-                <BadgeCheck />
+                <User />
                 {{ $t('sidebar.user.account') }}
               </DropdownMenuItem>
             </RouterLink>
@@ -80,6 +81,12 @@ const { isMobile } = useSidebar()
               <DropdownMenuItem>
                 <CreditCard />
                 {{ $t('sidebar.user.billing') }}
+              </DropdownMenuItem>
+            </RouterLink>
+            <RouterLink :to="{ name: 'OrganizationSettings' }">
+              <DropdownMenuItem>
+                <Building2 />
+                {{ $t('sidebar.user.organization') }}
               </DropdownMenuItem>
             </RouterLink>
           </DropdownMenuGroup>

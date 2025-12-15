@@ -35,6 +35,22 @@ const router = createRouter({
       },
     },
     {
+      path: '/spaces/:id',
+      name: 'ContextSpaceDetail',
+      component: () => import('@/views/ContextSpaceDetail.vue'),
+    },
+    {
+      path: '/spaces/:id/feature-requests',
+      name: 'FeatureRequests',
+      component: () => import('@/views/FeatureRequests.vue'),
+    },
+    {
+      path: '/settings/organization',
+      name: 'OrganizationSettings',
+      component: () => import('@/views/OrganizationSettings.vue'),
+    },
+
+    {
       path: '/admin-dashboard',
       name: 'AdminDashboard',
       component: () => import('@/views/AdminDashboard.vue'),

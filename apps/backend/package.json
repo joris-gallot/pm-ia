@@ -23,6 +23,7 @@
     "es-toolkit": "catalog:utils",
     "hono": "catalog:hono",
     "knex": "catalog:db",
+    "nanoid": "catalog:db",
     "pg": "catalog:db",
     "pino": "catalog:log",
     "pino-pretty": "catalog:log",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GalleryVerticalEnd, Home, ShieldCheck, Sparkles } from 'lucide-vue-next'
+import { Box, GalleryVerticalEnd, ShieldCheck, Sparkles } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -23,12 +23,15 @@ import { useAuthStore } from '@/stores/auth'
 const { t } = useI18n()
 const { me } = useAuthStore<true>()
 
-const allRoutes = [
+const mainRoutes = [
   {
-    title: t('sidebar.home'),
+    title: t('context_space.title'),
     name: 'Home',
-    icon: Home,
+    icon: Box,
   },
+]
+
+const adminRoutes = [
   {
     title: 'Admin Dashboard',
     name: 'AdminDashboard',
@@ -37,7 +40,11 @@ const allRoutes = [
 ]
 
 const routes = computed(() => {
-  return allRoutes.filter(route => canAccessRoute(route.name))
+  return mainRoutes.filter(route => canAccessRoute(route.name))
+})
+
+const adminItems = computed(() => {
+  return adminRoutes.filter(route => canAccessRoute(route.name))
 })
 </script>
 
@@ -75,6 +82,22 @@ const routes = computed(() => {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem v-for="route in routes" :key="route.name">
+              <SidebarMenuButton as-child :is-active="$route.name === route.name">
+                <RouterLink :to="{ name: route.name }">
+                  <component :is="route.icon" />
+                  <span>{{ route.title }}</span>
+                </RouterLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup v-if="adminItems.length > 0">
+        <SidebarGroupLabel>Admin</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem v-for="route in adminItems" :key="route.name">
               <SidebarMenuButton as-child :is-active="$route.name === route.name">
                 <RouterLink :to="{ name: route.name }">
                   <component :is="route.icon" />

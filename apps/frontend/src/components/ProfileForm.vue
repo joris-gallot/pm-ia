@@ -14,7 +14,7 @@ import { useAuthStore } from '@/stores/auth'
 const { t } = useI18n()
 const { me, refetchMe } = useAuthStore<true>()
 
-const { handleSubmit, resetForm, meta } = useForm({
+const { handleSubmit, resetForm, meta, isSubmitting } = useForm({
   name: 'ProfileForm',
   validationSchema: updateUserSchema,
   initialValues: {
@@ -71,14 +71,14 @@ const onSubmit = handleSubmit(async (values) => {
     </FormField>
 
     <div class="flex gap-2 justify-start">
-      <Button type="submit" :disabled="!meta.dirty">
+      <Button type="submit" :disabled="isSubmitting || !meta.dirty">
         {{ $t('account.profile.form.submit') }}
       </Button>
 
       <Button
         type="button"
         variant="outline"
-        :disabled="!meta.dirty"
+        :disabled="isSubmitting || !meta.dirty"
         @click="resetForm"
       >
         {{ $t('account.profile.form.reset') }}

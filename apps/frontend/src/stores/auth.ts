@@ -40,7 +40,6 @@ export const useAuthStore = createGlobalState(
         onSuccess: (user) => {
           me.value = user
           firstLoad.value = false
-
           handleUserRedirect(me.value)
         },
       },
