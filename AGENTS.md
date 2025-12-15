@@ -89,6 +89,9 @@ Config is in `src/lib/auth.ts`
 - Defined in `.env` file at the root of the project
 - Parsed at `src/lib/env.ts`
 
+### Logger
+- Logger is set up in `src/lib/logger.ts` using `pino`
+
 ### Import from common
  As defined in tsconfig `"@common/*": ["../common/src/*"]`
 
